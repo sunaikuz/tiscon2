@@ -8,11 +8,13 @@ import kotowari.component.TemplateEngine;
 import net.unit8.sigcolle.auth.LoginUserPrincipal;
 import net.unit8.sigcolle.dao.CampaignDao;
 import net.unit8.sigcolle.dao.SignatureDao;
+import net.unit8.sigcolle.dao.UserDao;
 import net.unit8.sigcolle.form.CampaignCreateForm;
 import net.unit8.sigcolle.form.CampaignForm;
 import net.unit8.sigcolle.form.SignatureForm;
 import net.unit8.sigcolle.model.Campaign;
 import net.unit8.sigcolle.model.Signature;
+import net.unit8.sigcolle.model.User;
 import net.unit8.sigcolle.model.UserCampaign;
 import org.pegdown.Extensions;
 import org.pegdown.PegDownProcessor;
@@ -28,7 +30,9 @@ import static enkan.util.ThreadingUtils.some;
 /**
  * @author kawasima
  */
-public class CampaignController {
+public class
+
+CampaignController {
     @Inject
     private TemplateEngine templateEngine;
 
@@ -102,12 +106,17 @@ public class CampaignController {
 
         PegDownProcessor processor = new PegDownProcessor(Extensions.ALL);
 
+        CampaignDao campaignDao = domaProvider.getDao(CampaignDao.class);
+
         // TODO タイトル, 目標人数を登録する
         Campaign model = builder(new Campaign())
-            .set(Campaign::setStatement, processor.markdownToHtml(form.getStatement()))
-            .set(Campaign::setCreateUserId, principal.getUserId())
+                .set(Campaign::setTitle, form.getTitle())
+                .set(Campaign::setGoal, Long.parseLong(form.getGoal()))
+                .set(Campaign::setStatement, processor.markdownToHtml(form.getStatement()))
+                .set(Campaign::setCreateUserId, principal.getUserId())
             .build();
-        // TODO Databaseに登録する
+        // TODO キャンペーンをDatabaseに登録する
+        campaignDao.insert(model);
 
         // TODO 作成完了した旨のflashメッセージを画面に表示する
         return builder(redirect("/campaign/" + model.getCampaignId(), SEE_OTHER))
@@ -122,7 +131,7 @@ public class CampaignController {
      * @param session ログインしているユーザsession
      */
     public HttpResponse listCampaigns(Session session) {
-        throw new UnsupportedOperationException("実装してください !!");
+        return templateEngine.render("campaign/list");
     }
 
     private HttpResponse showCampaign(Long campaignId,
