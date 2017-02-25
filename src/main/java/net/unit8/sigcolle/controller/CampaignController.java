@@ -131,7 +131,9 @@ CampaignController {
      * @param session ログインしているユーザsession
      */
     public HttpResponse listCampaigns(Session session) {
-        return templateEngine.render("campaign/list");
+        CampaignDao campaignDao = domaProvider.getDao(CampaignDao.class);
+
+        return templateEngine.render("campaign/list","campaigns",campaignDao.selectAll());
     }
 
     private HttpResponse showCampaign(Long campaignId,

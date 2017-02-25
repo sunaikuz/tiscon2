@@ -20,6 +20,11 @@ public interface CampaignDao {
     @Select
     List<Campaign> selectAll();
 
+    @Select
+    Campaign selectUserCampaign(Long createUserId);
+
     @Insert
     int insert(Campaign campaign);
+
+
 }
